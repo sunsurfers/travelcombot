@@ -1,2 +1,2 @@
 # travelcombot
-Telegram bot for many travel communities like sunsurfers or smenastation
+TravelComBot is a Telegram bot for travel communities like sunsurfers.ru or smenastation.com
