@@ -47,3 +47,23 @@ success_confirm_anket_text = """
 unsuccess_confirm_anket_text = """
 Ваша заявка отклонена администратором
 """
+
+admin_access_denied_text = """
+Вы не являетесь администратором бота. Доступ запрещен.
+"""
+
+admin_panel_greet_text = """
+Админ-панель
+"""
+
+ready_send_email_admin_text = """
+Отправьте сообщение для рассылки
+"""
+
+success_send_email_admin_text = """
+Сообщение успешно отправлено участникам бота
+"""
+
+cancel_text = """
+Действие отменено
+"""

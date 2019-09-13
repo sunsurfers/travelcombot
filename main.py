@@ -18,7 +18,8 @@ bot = telebot.TeleBot(config.BOT_TOKEN)
 
 
 # Обработчики последовательных действий пользователей 
-READY_TO_REGISTER = {}
+READY_TO_REGISTER = {}  # Регистрация
+READY_TO_ADMIN_EMAIL = {}  # Рассылка сообщения админом
 
 
 @bot.message_handler(commands=['start'])
@@ -35,6 +36,20 @@ def start_command_handler(message):
 		return bot.send_message(cid, texts.wait_confirm_text)
 	# TODO: Выдача основного меню пользователя.
 	return bot.send_message(cid, 'В разработке...')
+
+
+@bot.message_handler(commands=['admin'])
+def admin_command_handler(message):
+	cid = message.chat.id
+	uid = message.from_user.id
+	
+	if uid not in config.ADMINS:
+		return bot.send_message(cid, texts.admin_access_denied_text)
+
+	markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
+	for x in config.admin_markup:
+		markup.add(x)
+	return bot.send_message(cid, texts.admin_panel_greet_text, reply_markup=markup)
 
 
 @bot.message_handler(content_types=['photo'])
@@ -120,6 +135,46 @@ def text_content_handler(message):
 			del READY_TO_REGISTER[uid]
 			markup = types.ReplyKeyboardRemove()
 			return bot.send_message(cid, texts.register_complete, reply_markup=markup)
+	
+	# Обработка отмены действий админа
+	if message.text == '❌ Отмена':
+		if uid in config.ADMINS:
+			if uid in READY_TO_ADMIN_EMAIL:
+				del READY_TO_ADMIN_EMAIL[uid]
+			bot.send_message(cid, texts.cancel_text)
+			markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
+			for x in config.admin_markup:
+				markup.add(x)
+			return bot.send_message(cid, texts.admin_panel_greet_text, reply_markup=markup)
+
+	# Обработка действий админа
+	if uid in READY_TO_ADMIN_EMAIL:
+		if 'text' not in READY_TO_ADMIN_EMAIL[uid]:
+			READY_TO_ADMIN_EMAIL[uid]['text'] = message.text
+			logging.info('Admin message email')
+
+			users = database.get_all_users()
+			for x in users:
+				try:
+					bot.send_message(x['uid'], READY_TO_ADMIN_EMAIL[uid]['text'])
+				except Exception as e:
+					print(e)
+					continue
+
+			del READY_TO_ADMIN_EMAIL[uid]
+			bot.send_message(cid, texts.success_send_email_admin_text)
+			markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
+			for x in config.admin_markup:
+				markup.add(x)
+			return bot.send_message(cid, texts.admin_panel_greet_text, reply_markup=markup)
+
+	# Обработка админ-панели
+	if uid in config.ADMINS:
+		if message.text == 'Создать рассылку':
+			READY_TO_ADMIN_EMAIL[uid] = {}
+			markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
+			markup.add('❌ Отмена')
+			return bot.send_message(cid, texts.ready_send_email_admin_text, reply_markup=markup)
 
 
 @bot.callback_query_handler(func=lambda call: True)

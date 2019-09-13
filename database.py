@@ -63,6 +63,26 @@ def add_user(uid, register_date, name, avatar_path, community,
 		connection.close()
 
 
+def get_all_users():
+	"""
+	Получить всех пользователей бота
+	"""
+	connection = pymysql.connect(
+		host=config.db_host,
+		user=config.db_user,
+		password=config.db_password,
+		db=config.db_database,
+		charset=config.db_charset,
+		cursorclass=pymysql.cursors.DictCursor)
+	try:
+		with connection.cursor() as cursor:
+			sql = 'SELECT * FROM users'
+			cursor.execute(sql)
+		return cursor.fetchall()
+	finally:
+		connection.close()
+
+
 def get_user(uid):
 	"""
 	Получить заявку пользователя
