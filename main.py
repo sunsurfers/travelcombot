@@ -59,18 +59,21 @@ def text_content_handler(message):
 
 	# Обработка добавления аватарки
 	if uid in READY_TO_REGISTER:
-		if 'avatar' not in READY_TO_REGISTER[uid]:
-			file_info = bot.get_file(message.photo[-1].file_id)
-			downloaded_file = bot.download_file(file_info.file_path)
-			photo_path = '{!s}{!s}.jpg'.format(config.AVARATRS_PATH, uid)
-			with open(photo_path, 'wb') as new_file:
-				new_file.write(downloaded_file)
-			READY_TO_REGISTER[uid]['avatar'] = photo_path
-			markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
-			for x in config.community_types:
-				markup.add(x)
-			markup.add('Другое')
-			return bot.send_message(cid, texts.register_travel_type, reply_markup=markup)
+		if 'name' in READY_TO_REGISTER:
+			if 'avatar' not in READY_TO_REGISTER[uid]:
+				file_info = bot.get_file(message.photo[-1].file_id)
+				downloaded_file = bot.download_file(file_info.file_path)
+				photo_path = '{!s}{!s}.jpg'.format(config.AVARATRS_PATH, uid)
+				with open(photo_path, 'wb') as new_file:
+					new_file.write(downloaded_file)
+				READY_TO_REGISTER[uid]['avatar'] = photo_path
+				markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
+				cm = database.get_communities()
+				communities = [x['name'] for x in cm]
+				for x in communities:
+					markup.add(x)
+				markup.add('Другое')
+				return bot.send_message(cid, texts.register_travel_type, reply_markup=markup)
 
 
 @bot.message_handler(content_types=['text'])
@@ -89,7 +92,9 @@ def text_content_handler(message):
 			if message.text == 'Не сейчас':
 				READY_TO_REGISTER[uid]['avatar'] = 'default.jpg'
 				markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
-				for x in config.community_types:
+				cm = database.get_communities()
+				communities = [x['name'] for x in cm]
+				for x in communities:
 					markup.add(x)
 				markup.add('Другое')
 				return bot.send_message(cid, texts.register_travel_type, reply_markup=markup)
@@ -100,14 +105,22 @@ def text_content_handler(message):
 				keyboard.add(types.InlineKeyboardButton('Узнать, кто такие сансерферы', url='https://sunsurfers.ru'))
 				keyboard.add(types.InlineKeyboardButton('Узнать, кто такие сменщики', url='https://smenastation.com'))
 				return bot.send_message(cid, texts.community_more_info_text, reply_markup=keyboard)
-			if message.text not in config.community_types:
+			cm = database.get_communities()
+			communities = [x['name'] for x in cm]
+			if message.text not in communities:
 				return bot.send_message(cid, texts.error_button_text)
 			READY_TO_REGISTER[uid]['community'] = message.text
+			for x in cm:
+				if message.text == x['name']:
+					READY_TO_REGISTER[uid]['community_id'] = x['id']
 
+			'''
 			# TODO: автоматическая проверка на присутсивие в white листе airtables
 			if READY_TO_REGISTER[uid]['community'] == 'Сансерферы':
 				pass
-			
+			'''
+
+			# TODO: Вывод мероприятий
 			markup = types.ReplyKeyboardRemove()
 			return bot.send_message(cid, texts.register_events_question_text, reply_markup=markup)
 		elif 'events' not in READY_TO_REGISTER[uid]:
@@ -116,9 +129,8 @@ def text_content_handler(message):
 		elif 'confirm_people' not in READY_TO_REGISTER[uid]:
 			READY_TO_REGISTER[uid]['confirm_people'] = message.text
 
-			user = database.add_user(uid, int(time.time()), READY_TO_REGISTER[uid]['name'], 
-				READY_TO_REGISTER[uid]['avatar'], READY_TO_REGISTER[uid]['community'],
-				READY_TO_REGISTER[uid]['events'], READY_TO_REGISTER[uid]['confirm_people'], None, 0)
+			user = database.add_user(None, READY_TO_REGISTER[uid]['name'], READY_TO_REGISTER[uid]['avatar'],
+				0, None, uid, None, READY_TO_REGISTER[uid]['community_id'])
 
 			# Отправить анкету в канал админов
 			channel_text = 'Новая заявка №{!s}\n\n<a href="tg://user?id={!s}">Ссылка</a>\n\nИмя: {!s}\nСообщество: {!s}\nМероприятия: {!s}\nДоверенные люди: {!s}'.format(
@@ -218,8 +230,6 @@ def callback_inline(call):
 
 
 def main():
-	database.create_tables()
-
 	# Создать папку для хранения аватарок пользователей
 	try:
 		os.mkdir(config.AVARATRS_PATH)
