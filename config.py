@@ -1,9 +1,9 @@
 import os
 
 
-BOT_TOKEN = os.environ['BOT_TOKEN']
+BOT_TOKEN = os.getenv('BOT_TOKEN')
 DEBUG = True  # TODO
-PROXY = {'https': os.environ['PROXY_STRING']}
+PROXY = {'https': os.getenv('PROXY_STRING')}
 LOGGER_PATH = 'logging.log'
 AVARATRS_PATH = 'avatars/'
 # ID Telegram админов в боте
@@ -28,3 +28,8 @@ community_types = [
 admin_markup = [
 	'Создать рассылку',
 ]
+
+try:
+	from local_config import *
+except ImportError:
+	pass

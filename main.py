@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 
-import os
-import time
 import logging
 
 import telebot
-from telebot import types, apihelper
+from telebot import types
 
 import database
 import texts
 import config
+from main_func import main
 
 
 logging.basicConfig(filename=config.LOGGER_PATH, level=logging.INFO)
@@ -229,25 +228,5 @@ def callback_inline(call):
 		return bot.edit_message_caption(text, chat_id=cid, message_id=call.message.message_id)
 
 
-def main():
-	# Создать папку для хранения аватарок пользователей
-	try:
-		os.mkdir(config.AVARATRS_PATH)
-	except Exception as e:
-		pass
-
-	if config.DEBUG:
-		apihelper.proxy = config.PROXY
-		bot.polling()
-	else:
-		while True:
-			try:
-				bot.polling(none_stop=True, interval=0)
-			except Exception as e:
-				print(e)
-				time.sleep(30)
-				continue
-
-
 if __name__ == '__main__':
-	main()
+	main(bot)
