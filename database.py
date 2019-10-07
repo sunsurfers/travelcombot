@@ -23,7 +23,7 @@ def add_user(email, name, photo, is_host, about, telegram, insta, community):
 			sql = 'INSERT INTO users (email, name, photo, is_host, about, telegram, insta, community) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
 			cursor.execute(sql, (email, name, photo, is_host, about, telegram, insta, community))
 			connection.commit()
-			sql = 'SELECT * FROM users ORDER BY id DESC LIMIT 1'
+			sql = 'SELECT * FROM users WHERE id = LAST_INSERT_ID()'
 			cursor.execute(sql)
 		return cursor.fetchone()
 	finally:
