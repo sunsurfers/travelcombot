@@ -3,17 +3,21 @@ import pymysql.cursors
 import config
 
 
-def add_user(email, name, photo, is_host, about, telegram, insta, community):
-	"""
-	Добавить заявку пользователя в базу данных
-	"""
-	connection = pymysql.connect(
+def get_connection():
+	return pymysql.connect(
 		host=config.db_host,
 		user=config.db_user,
 		password=config.db_password,
 		db=config.db_database,
 		charset=config.db_charset,
 		cursorclass=pymysql.cursors.DictCursor)
+
+
+def add_user(email, name, photo, is_host, about, telegram, insta, community):
+	"""
+	Добавить заявку пользователя в базу данных
+	"""
+	connection = get_connection()
 	try:
 		with connection.cursor() as cursor:
 			sql = 'INSERT INTO users (email, name, photo, is_host, about, telegram, insta, community) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
@@ -30,13 +34,7 @@ def get_all_users():
 	"""
 	Получить всех пользователей бота
 	"""
-	connection = pymysql.connect(
-		host=config.db_host,
-		user=config.db_user,
-		password=config.db_password,
-		db=config.db_database,
-		charset=config.db_charset,
-		cursorclass=pymysql.cursors.DictCursor)
+	connection = get_connection()
 	try:
 		with connection.cursor() as cursor:
 			sql = 'SELECT * FROM user'
@@ -50,13 +48,7 @@ def get_user(uid):
 	"""
 	Получить заявку пользователя
 	"""
-	connection = pymysql.connect(
-		host=config.db_host,
-		user=config.db_user,
-		password=config.db_password,
-		db=config.db_database,
-		charset=config.db_charset,
-		cursorclass=pymysql.cursors.DictCursor)
+	connection = get_connection()
 	try:
 		with connection.cursor() as cursor:
 			sql = 'SELECT * FROM user WHERE telegram=%s'
@@ -70,13 +62,7 @@ def confirm_user(id):
 	"""
 	Подтвердить заявку
 	"""
-	connection = pymysql.connect(
-		host=config.db_host,
-		user=config.db_user,
-		password=config.db_password,
-		db=config.db_database,
-		charset=config.db_charset,
-		cursorclass=pymysql.cursors.DictCursor)
+	connection = get_connection()
 	try:
 		with connection.cursor() as cursor:
 			sql = 'UPDATE user SET is_host=1 WHERE id=%s'
@@ -90,13 +76,7 @@ def delete_user(id):
 	"""
 	Удалить заявку пользователя
 	"""
-	connection = pymysql.connect(
-		host=config.db_host,
-		user=config.db_user,
-		password=config.db_password,
-		db=config.db_database,
-		charset=config.db_charset,
-		cursorclass=pymysql.cursors.DictCursor)
+	connection = get_connection()
 	try:
 		with connection.cursor() as cursor:
 			sql = 'DELETE FROM user WHERE id=%s'
@@ -110,13 +90,7 @@ def get_communities():
 	"""
 	Получить все сообщества
 	"""
-	connection = pymysql.connect(
-		host=config.db_host,
-		user=config.db_user,
-		password=config.db_password,
-		db=config.db_database,
-		charset=config.db_charset,
-		cursorclass=pymysql.cursors.DictCursor)
+	connection = get_connection()
 	try:
 		with connection.cursor() as cursor:
 			sql = 'SELECT * FROM community'
