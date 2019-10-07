@@ -37,7 +37,7 @@ def get_all_users():
 	connection = get_connection()
 	try:
 		with connection.cursor() as cursor:
-			sql = 'SELECT * FROM user'
+			sql = 'SELECT * FROM users'
 			cursor.execute(sql)
 		return cursor.fetchall()
 	finally:
@@ -51,7 +51,7 @@ def get_user(uid):
 	connection = get_connection()
 	try:
 		with connection.cursor() as cursor:
-			sql = 'SELECT * FROM user WHERE telegram=%s'
+			sql = 'SELECT * FROM users WHERE telegram=%s'
 			cursor.execute(sql, (uid,))
 		return cursor.fetchone()
 	finally:
@@ -65,7 +65,7 @@ def confirm_user(id):
 	connection = get_connection()
 	try:
 		with connection.cursor() as cursor:
-			sql = 'UPDATE user SET is_host=1 WHERE id=%s'
+			sql = 'UPDATE users SET is_host=1 WHERE id=%s'
 			cursor.execute(sql, (id,))
 		connection.commit()
 	finally:
@@ -79,7 +79,7 @@ def delete_user(id):
 	connection = get_connection()
 	try:
 		with connection.cursor() as cursor:
-			sql = 'DELETE FROM user WHERE id=%s'
+			sql = 'DELETE FROM users WHERE id=%s'
 			cursor.execute(sql, (id,))
 		connection.commit()
 	finally:
@@ -93,7 +93,7 @@ def get_communities():
 	connection = get_connection()
 	try:
 		with connection.cursor() as cursor:
-			sql = 'SELECT * FROM community'
+			sql = 'SELECT * FROM communities'
 			cursor.execute(sql)
 			return cursor.fetchall()
 		connection.commit()
