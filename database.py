@@ -20,10 +20,10 @@ def add_user(email, name, photo, is_host, about, telegram, insta, community):
 	connection = get_connection()
 	try:
 		with connection.cursor() as cursor:
-			sql = 'INSERT INTO users (email, name, photo, is_host, about, telegram, insta, community) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
+			sql = 'INSERT INTO user (email, name, photo, is_host, about, telegram, insta, community) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
 			cursor.execute(sql, (email, name, photo, is_host, about, telegram, insta, community))
 			connection.commit()
-			sql = 'SELECT * FROM users WHERE id = LAST_INSERT_ID()'
+			sql = 'SELECT * FROM user WHERE id = LAST_INSERT_ID()'
 			cursor.execute(sql)
 		return cursor.fetchone()
 	finally:
@@ -37,7 +37,7 @@ def get_all_users():
 	connection = get_connection()
 	try:
 		with connection.cursor() as cursor:
-			sql = 'SELECT * FROM users'
+			sql = 'SELECT * FROM user'
 			cursor.execute(sql)
 		return cursor.fetchall()
 	finally:
@@ -51,7 +51,7 @@ def get_user(uid):
 	connection = get_connection()
 	try:
 		with connection.cursor() as cursor:
-			sql = 'SELECT * FROM users WHERE telegram=%s'
+			sql = 'SELECT * FROM user WHERE telegram=%s'
 			cursor.execute(sql, (uid,))
 		return cursor.fetchone()
 	finally:
@@ -65,7 +65,7 @@ def confirm_user(id):
 	connection = get_connection()
 	try:
 		with connection.cursor() as cursor:
-			sql = 'UPDATE users SET is_host=1 WHERE id=%s'
+			sql = 'UPDATE user SET is_host=1 WHERE id=%s'
 			cursor.execute(sql, (id,))
 		connection.commit()
 	finally:
@@ -79,7 +79,7 @@ def delete_user(id):
 	connection = get_connection()
 	try:
 		with connection.cursor() as cursor:
-			sql = 'DELETE FROM users WHERE id=%s'
+			sql = 'DELETE FROM user WHERE id=%s'
 			cursor.execute(sql, (id,))
 		connection.commit()
 	finally:
@@ -93,7 +93,7 @@ def get_communities():
 	connection = get_connection()
 	try:
 		with connection.cursor() as cursor:
-			sql = 'SELECT * FROM communities'
+			sql = 'SELECT * FROM community'
 			cursor.execute(sql)
 			return cursor.fetchall()
 		connection.commit()
