@@ -42,6 +42,8 @@ TravelComBot is a Telegram bot for travel communities like sunsurfers.ru or smen
 
 Установка Docker под Ubuntu - https://docs.docker.com/install/linux/docker-ce/ubuntu/
 
+Установка Docker под Mac - https://docs.docker.com/docker-for-mac/install/
+
 Установка Docker под Windows - https://docs.docker.com/docker-for-windows/install/
 
 2. Прописать в `local_config_main.py` и `local_config_useradd.py` соответствующие токены в переменную `BOT_TOKEN`.
