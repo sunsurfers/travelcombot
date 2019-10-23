@@ -4,4 +4,4 @@ avatars
 *.log
 *.out
 *.db
-local_config.py
+local_config*

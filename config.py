@@ -10,11 +10,10 @@ AVARATRS_PATH = 'avatars/'
 ADMINS = [217166737, 263156959]
 
 # MySQL данные для авторизации
-# CREATE DATABASE `travelcombot` CHARACTER SET utf8 COLLATE utf8_general_ci;
-db_host = 'localhost'
-db_user='root'
-db_password='123456'
-db_database='travelcombot'
+db_host = 'mysql'
+db_user = 'root'
+db_password = ''
+db_database = ''
 db_charset = 'utf8'
 
 # ID Telegram канала для подтверждение анкет полльзователей
