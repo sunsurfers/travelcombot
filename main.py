@@ -19,6 +19,8 @@ bot = telebot.TeleBot(config.BOT_TOKEN)
 # Обработчики последовательных действий пользователей 
 READY_TO_REGISTER = {}  # Регистрация
 READY_TO_ADMIN_EMAIL = {}  # Рассылка сообщения админом
+READY_TO_ADD_ABOUT = {}  # Добавление about
+READY_TO_ADD_INSTA = {}  # Добавление insta
 
 
 @bot.message_handler(commands=['start'])
@@ -26,15 +28,22 @@ def start_command_handler(message):
 	cid = message.chat.id
 	uid = message.from_user.id
 	user = database.get_user(uid)
+
+	# Проверка на регистрацию пользователя в боте
 	if not user:
 		logging.info('Started by {!s}, id {!s}'.format(message.from_user.first_name, cid))
 		READY_TO_REGISTER[uid] = {}
 		markup = types.ReplyKeyboardRemove()
 		return bot.send_message(cid, texts.start_text, reply_markup=markup)
+
+	# Проверка на подтвержденность анкеты админом
 	if not user['is_host']:
 		return bot.send_message(cid, texts.wait_confirm_text)
-	# TODO: Выдача основного меню пользователя.
-	return bot.send_message(cid, 'В разработке...')
+
+	markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
+	for x in config.main_markup:
+		markup.row(x)
+	return bot.send_message(cid, texts.main_text, reply_markup=markup)
 
 
 @bot.message_handler(commands=['admin'])
@@ -42,6 +51,7 @@ def admin_command_handler(message):
 	cid = message.chat.id
 	uid = message.from_user.id
 	
+	# Проверка наличия прав админа
 	if uid not in config.ADMINS:
 		return bot.send_message(cid, texts.admin_access_denied_text)
 
@@ -149,6 +159,7 @@ def text_content_handler(message):
 			if len(READY_TO_REGISTER[uid]['event_ids']) == 0:
 				text = 'Выберите хотя бы одно мероприятие'
 				return bot.send_message(cid, text)
+
 			READY_TO_REGISTER[uid]['events'] = message.text
 			return bot.send_message(cid, texts.register_confirm_people_text)
 		elif 'confirm_people' not in READY_TO_REGISTER[uid]:
@@ -175,6 +186,16 @@ def text_content_handler(message):
 			del READY_TO_REGISTER[uid]
 			markup = types.ReplyKeyboardRemove()
 			return bot.send_message(cid, texts.register_complete, reply_markup=markup)
+
+	# Обработка отмены действий пользователя
+	if message.text == '❌ Отменить':
+		if uid in READY_TO_ADD_ABOUT:
+			del READY_TO_ADD_ABOUT[uid]
+		bot.send_message(cid, texts.cancel_text)
+		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
+		for x in config.main_markup:
+			markup.row(x)
+		return bot.send_message(cid, texts.main_text, reply_markup=markup)
 
 	# Обработка отмены действий админа
 	if message.text == '❌ Отмена':
@@ -208,13 +229,96 @@ def text_content_handler(message):
 				markup.add(x)
 			return bot.send_message(cid, texts.admin_panel_greet_text, reply_markup=markup)
 
+	# Обработка добавления about
+	if uid in READY_TO_ADD_ABOUT:
+		if 'text' not in READY_TO_ADD_ABOUT[uid]:
+			READY_TO_ADD_ABOUT[uid]['text'] = message.text
+
+			# Обвновить данные о пользователе в базе
+			user = database.get_user(uid)
+			database.update_user(user['id'], user['email'], user['name'], user['photo'], user['is_host'],
+				READY_TO_ADD_ABOUT[uid]['text'], user['telegram'], user['insta'], user['community'])
+
+			del READY_TO_ADD_ABOUT[uid]
+			bot.send_message(cid, texts.about_updated)
+			markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
+			for x in config.setting_markup:
+				markup.row(x)
+			markup.row('↪️ В главное меню')
+			return bot.send_message(cid, texts.settings_text, reply_markup=markup)
+
+	# Обработка добавления insta
+	if uid in READY_TO_ADD_INSTA:
+		if 'text' not in READY_TO_ADD_INSTA[uid]:
+			READY_TO_ADD_INSTA[uid]['text'] = message.text
+
+			# Обвновить данные о пользователе в базе
+			user = database.get_user(uid)
+			database.update_user(user['id'], user['email'], user['name'], user['photo'], user['is_host'],
+				user['about'], user['telegram'], READY_TO_ADD_INSTA[uid]['text'], user['community'])
+
+			del READY_TO_ADD_INSTA[uid]
+			bot.send_message(cid, texts.insta_updated)
+			markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
+			for x in config.setting_markup:
+				markup.row(x)
+			markup.row('↪️ В главное меню')
+			return bot.send_message(cid, texts.settings_text, reply_markup=markup)
+
 	# Обработка админ-панели
 	if uid in config.ADMINS:
-		if message.text == 'Создать рассылку':
+		if message.text == '📩 Создать рассылку':
 			READY_TO_ADMIN_EMAIL[uid] = {}
 			markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
 			markup.add('❌ Отмена')
 			return bot.send_message(cid, texts.ready_send_email_admin_text, reply_markup=markup)
+
+	# Обработка основной клавиатуры пользователя
+	if message.text == '📍 Поделиться геолокацией':
+		return bot.send_message(cid, 'В разработке...')
+	elif message.text == '🗺 Посмотреть геолокации пользователей':
+		return bot.send_message(cid, 'В разработке...')
+	elif message.text == '⚙️ Настройки':
+		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
+		for x in config.setting_markup:
+			markup.row(x)
+		markup.row('↪️ В главное меню')
+		return bot.send_message(cid, texts.settings_text, reply_markup=markup)
+
+	# Возврат в главное меню
+	if message.text == '↪️ В главное меню':
+		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
+		for x in config.main_markup:
+			markup.row(x)
+		return bot.send_message(cid, texts.main_text, reply_markup=markup)
+
+	# Обработка меню настроек
+	if message.text == 'ℹ️ Рассказать о себе и своих интересах':
+		READY_TO_ADD_ABOUT[uid] = {}
+		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
+		markup.row('❌ Отменить')
+		about_text = ''
+		user = database.get_user(uid)
+		if user['about']:
+			about_text = user['about']
+		text = '{!s}\n\nВаши интересы на данный момент: {!s}'.format(texts.add_about, about_text)
+		return bot.send_message(cid, text, reply_markup=markup)
+	elif message.text == '🎇 Дополнить мероприятия':
+		typeofevents = database.get_all_typeofevents()
+		keyboard = types.InlineKeyboardMarkup()
+		for x in typeofevents:
+			keyboard.add(types.InlineKeyboardButton(text=x['name'], callback_data='addselecttypeofevent_{!s}'.format(x['id'])))
+		return bot.send_message(cid, texts.register_type_events_question_text, reply_markup=keyboard)
+	elif message.text == '📱 Добавить ссылку на инстаграм':
+		READY_TO_ADD_INSTA[uid] = {}
+		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
+		markup.row('❌ Отменить')
+		insta_text = ''
+		user = database.get_user(uid)
+		if user['insta']:
+			insta_text = user['insta']
+		text = '{!s}\n\nВаш инстаграм на данный момент: {!s}'.format(texts.add_about, insta_text)
+		return bot.send_message(cid, text, reply_markup=markup)
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -229,6 +333,7 @@ def callback_inline(call):
 	except Exception as e:
 		print(e)
 
+	# Обработка подтверждения\отклонения новых анкет админом
 	if call.data.startswith('confirmanket'):
 		anket_id = int(call.data.split('_')[1])
 		user_id = int(call.data.split('_')[2])
@@ -254,7 +359,9 @@ def callback_inline(call):
 			print(e)
 
 		return bot.edit_message_caption(texts.unsuccess_register, chat_id=cid, message_id=call.message.message_id)
-	elif call.data.startswith('selecttypeofevent'):
+	
+	# Обработка выбора мероприятий при регистрации
+	if call.data.startswith('selecttypeofevent'):
 		typeofevent_id = int(call.data.split('_')[1])
 		events = database.get_events_by_event_type_id(typeofevent_id)
 		keyboard = types.InlineKeyboardMarkup()
@@ -289,6 +396,37 @@ def callback_inline(call):
 			return bot.edit_message_text(text, chat_id=cid, message_id=call.message.message_id, reply_markup=None)
 		READY_TO_REGISTER[uid]['events'] = True
 		return bot.send_message(cid, texts.register_confirm_people_text)
+
+	# Обработка добавления новых мероприятий
+	if call.data.startswith('addselecttypeofevent'):
+		typeofevent_id = int(call.data.split('_')[1])
+		events = database.get_events_by_event_type_id(typeofevent_id)
+		user = database.get_user(uid)
+		user_event_ids = [x['event'] for x in database.get_user_events(user['id'])]
+		keyboard = types.InlineKeyboardMarkup()
+		for x in events:
+			if x['id'] in user_event_ids:
+				continue
+			keyboard.add(types.InlineKeyboardButton(text=x['name'], callback_data='addselectevent_{!s}'.format(x['id'])))
+		keyboard.add(types.InlineKeyboardButton(text='↪️ Назад', callback_data='addselectalltypeevents'))
+		return bot.edit_message_text(texts.register_events_question_text, chat_id=cid, message_id=call.message.message_id, reply_markup=keyboard)
+	elif call.data.startswith('addselectevent'):
+		event_id = int(call.data.split('_')[1])
+		event = database.get_event_by_id(event_id)
+		text = 'Вы добавили мероприятие {!s}'.format(event['name'])
+		user = database.get_user(uid)
+		database.add_user_event(user['id'], event_id)
+		bot.edit_message_text(text, chat_id=cid, message_id=call.message.message_id, reply_markup=None)
+		text = 'Желаете отметить ещё мероприятия?'
+		keyboard = types.InlineKeyboardMarkup()
+		keyboard.add(types.InlineKeyboardButton(text='➕ Добавить ещё', callback_data='addselectalltypeevents'))
+		return bot.send_message(cid, text, reply_markup=keyboard)
+	elif call.data == 'addselectalltypeevents':
+		typeofevents = database.get_all_typeofevents()
+		keyboard = types.InlineKeyboardMarkup()
+		for x in typeofevents:
+			keyboard.add(types.InlineKeyboardButton(text=x['name'], callback_data='addselecttypeofevent_{!s}'.format(x['id'])))
+		return bot.edit_message_text(texts.register_type_events_question_text, chat_id=cid, message_id=call.message.message_id, reply_markup=keyboard)
 
 
 if __name__ == '__main__':

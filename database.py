@@ -30,6 +30,20 @@ def add_user(email, name, photo, is_host, about, telegram, insta, community):
 		connection.close()
 
 
+def update_user(id, email, name, photo, is_host, about, telegram, insta, community):
+	"""
+	Обновить пользователя
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'UPDATE user SET email=%s, name=%s, photo=%s, is_host=%s, about=%s, telegram=%s, insta=%s, community=%s WHERE id=%s'
+			cursor.execute(sql, (email, name, photo, is_host, about, telegram, insta, community, id))
+		connection.commit()	
+	finally:
+		connection.close()
+
+
 def get_all_users():
 	"""
 	Получить всех пользователей бота
@@ -166,5 +180,19 @@ def delete_all_user_events(id):
 			sql = 'DELETE FROM event_user WHERE user=%s'
 			cursor.execute(sql, (id,))
 		connection.commit()
+	finally:
+		connection.close()
+
+
+def get_user_events(user_id):
+	"""
+	Получить мероприятия пользователя
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'SELECT * FROM event_user WHERE user=%s'
+			cursor.execute(sql, (user_id,))
+		return cursor.fetchall()
 	finally:
 		connection.close()
