@@ -22,8 +22,12 @@ error_button_text = """
 Выберите одну из кнопок на клавиатуре!
 """
 
+register_type_events_question_text = """
+Выберите тип мероприятия, в которых ты участвовал(а)?
+"""
+
 register_events_question_text = """
-В каких мероприятиях сообщества ты участвовал(а)?
+Выберите мероприятие сообщества, в котором ты участвовал(а)?
 """
 
 register_confirm_people_text = """
@@ -66,4 +70,12 @@ success_send_email_admin_text = """
 
 cancel_text = """
 Действие отменено
+"""
+
+success_register = """
+Заявка подтверждена
+"""
+
+unsuccess_register = """
+Заявка отклонена
 """

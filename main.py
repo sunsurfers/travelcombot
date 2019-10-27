@@ -31,7 +31,7 @@ def start_command_handler(message):
 		READY_TO_REGISTER[uid] = {}
 		markup = types.ReplyKeyboardRemove()
 		return bot.send_message(cid, texts.start_text, reply_markup=markup)
-	if not user['is_confirm']:
+	if not user['is_host']:
 		return bot.send_message(cid, texts.wait_confirm_text)
 	# TODO: Выдача основного меню пользователя.
 	return bot.send_message(cid, 'В разработке...')
@@ -58,7 +58,7 @@ def text_content_handler(message):
 
 	# Обработка добавления аватарки
 	if uid in READY_TO_REGISTER:
-		if 'name' in READY_TO_REGISTER:
+		if 'name' in READY_TO_REGISTER[uid]:
 			if 'avatar' not in READY_TO_REGISTER[uid]:
 				file_info = bot.get_file(message.photo[-1].file_id)
 				downloaded_file = bot.download_file(file_info.file_path)
@@ -113,16 +113,42 @@ def text_content_handler(message):
 				if message.text == x['name']:
 					READY_TO_REGISTER[uid]['community_id'] = x['id']
 
-			'''
 			# TODO: автоматическая проверка на присутсивие в white листе airtables
-			if READY_TO_REGISTER[uid]['community'] == 'Сансерферы':
-				pass
-			'''
 
-			# TODO: Вывод мероприятий
-			markup = types.ReplyKeyboardRemove()
-			return bot.send_message(cid, texts.register_events_question_text, reply_markup=markup)
+			if READY_TO_REGISTER[uid]['community'] == 'Смена':
+				READY_TO_REGISTER[uid]['events'] = ''
+				READY_TO_REGISTER[uid]['confirm_people'] = ''
+
+				user = database.add_user(None, READY_TO_REGISTER[uid]['name'], READY_TO_REGISTER[uid]['avatar'],
+					0, None, uid, None, READY_TO_REGISTER[uid]['community_id'])
+
+				# Отправить анкету в канал админов
+				channel_text = 'Новая заявка №{!s}\n\n<a href="tg://user?id={!s}">Ссылка</a>\n\nИмя: {!s}\nСообщество: {!s}\nМероприятия: {!s}\nДоверенные люди: {!s}'.format(
+					user['id'], uid, READY_TO_REGISTER[uid]['name'], READY_TO_REGISTER[uid]['community'], 
+					READY_TO_REGISTER[uid]['events'], READY_TO_REGISTER[uid]['confirm_people'])
+				keyboard = types.InlineKeyboardMarkup()
+				keyboard.add(types.InlineKeyboardButton('✅ Подтвердить', callback_data='confirmanket_{!s}_{!s}'.format(user['id'], user['telegram'])))
+				keyboard.add(types.InlineKeyboardButton('❌ Отклонить', callback_data='refuseanket_{!s}_{!s}'.format(user['id'], user['telegram'])))
+				bot.send_photo(config.admin_channel_id, open(READY_TO_REGISTER[uid]['avatar'], 'rb'), 
+					caption=channel_text, reply_markup=keyboard, parse_mode='HTML')
+
+				logging.info('User {!s} anket sended to channel'.format(cid))
+
+				del READY_TO_REGISTER[uid]
+				markup = types.ReplyKeyboardRemove()
+				return bot.send_message(cid, texts.register_complete, reply_markup=markup)
+
+			READY_TO_REGISTER[uid]['event_ids'] = []
+			READY_TO_REGISTER[uid]['events_text'] = ''
+			typeofevents = database.get_all_typeofevents()
+			keyboard = types.InlineKeyboardMarkup()
+			for x in typeofevents:
+				keyboard.add(types.InlineKeyboardButton(text=x['name'], callback_data='selecttypeofevent_{!s}'.format(x['id'])))
+			return bot.send_message(cid, texts.register_type_events_question_text, reply_markup=keyboard)
 		elif 'events' not in READY_TO_REGISTER[uid]:
+			if len(READY_TO_REGISTER[uid]['event_ids']) == 0:
+				text = 'Выберите хотя бы одно мероприятие'
+				return bot.send_message(cid, text)
 			READY_TO_REGISTER[uid]['events'] = message.text
 			return bot.send_message(cid, texts.register_confirm_people_text)
 		elif 'confirm_people' not in READY_TO_REGISTER[uid]:
@@ -131,13 +157,16 @@ def text_content_handler(message):
 			user = database.add_user(None, READY_TO_REGISTER[uid]['name'], READY_TO_REGISTER[uid]['avatar'],
 				0, None, uid, None, READY_TO_REGISTER[uid]['community_id'])
 
+			for x in READY_TO_REGISTER[uid]['event_ids']:
+				database.add_user_event(user['id'], x)
+
 			# Отправить анкету в канал админов
 			channel_text = 'Новая заявка №{!s}\n\n<a href="tg://user?id={!s}">Ссылка</a>\n\nИмя: {!s}\nСообщество: {!s}\nМероприятия: {!s}\nДоверенные люди: {!s}'.format(
 				user['id'], uid, READY_TO_REGISTER[uid]['name'], READY_TO_REGISTER[uid]['community'], 
-				READY_TO_REGISTER[uid]['events'], READY_TO_REGISTER[uid]['confirm_people'])
+				READY_TO_REGISTER[uid]['events_text'], READY_TO_REGISTER[uid]['confirm_people'])
 			keyboard = types.InlineKeyboardMarkup()
-			keyboard.add(types.InlineKeyboardButton('✅ Подтвердить', callback_data='confirmanket_{!s}_{!s}'.format(user['id'], user['uid'])))
-			keyboard.add(types.InlineKeyboardButton('❌ Отклонить', callback_data='refuseanket_{!s}_{!s}'.format(user['id'], user['uid'])))
+			keyboard.add(types.InlineKeyboardButton('✅ Подтвердить', callback_data='confirmanket_{!s}_{!s}'.format(user['id'], user['telegram'])))
+			keyboard.add(types.InlineKeyboardButton('❌ Отклонить', callback_data='refuseanket_{!s}_{!s}'.format(user['id'], user['telegram'])))
 			bot.send_photo(config.admin_channel_id, open(READY_TO_REGISTER[uid]['avatar'], 'rb'), 
 				caption=channel_text, reply_markup=keyboard, parse_mode='HTML')
 
@@ -146,7 +175,7 @@ def text_content_handler(message):
 			del READY_TO_REGISTER[uid]
 			markup = types.ReplyKeyboardRemove()
 			return bot.send_message(cid, texts.register_complete, reply_markup=markup)
-	
+
 	# Обработка отмены действий админа
 	if message.text == '❌ Отмена':
 		if uid in config.ADMINS:
@@ -167,7 +196,7 @@ def text_content_handler(message):
 			users = database.get_all_users()
 			for x in users:
 				try:
-					bot.send_message(x['uid'], READY_TO_ADMIN_EMAIL[uid]['text'])
+					bot.send_message(x['telegram'], READY_TO_ADMIN_EMAIL[uid]['text'])
 				except Exception as e:
 					print(e)
 					continue
@@ -211,11 +240,11 @@ def callback_inline(call):
 		except Exception as e:
 			print(e)
 
-		text = 'Заявка подтверждена'
-		return bot.edit_message_caption(text, chat_id=cid, message_id=call.message.message_id)
+		return bot.edit_message_caption(texts.success_register, chat_id=cid, message_id=call.message.message_id)
 	elif call.data.startswith('refuseanket'):
 		anket_id = int(call.data.split('_')[1])
 		user_id = int(call.data.split('_')[2])
+		database.delete_all_user_events(anket_id)
 		database.delete_user(anket_id)
 
 		# Выслать уведомление пользователю
@@ -224,8 +253,42 @@ def callback_inline(call):
 		except Exception as e:
 			print(e)
 
-		text = 'Заявка отклонена'
-		return bot.edit_message_caption(text, chat_id=cid, message_id=call.message.message_id)
+		return bot.edit_message_caption(texts.unsuccess_register, chat_id=cid, message_id=call.message.message_id)
+	elif call.data.startswith('selecttypeofevent'):
+		typeofevent_id = int(call.data.split('_')[1])
+		events = database.get_events_by_event_type_id(typeofevent_id)
+		keyboard = types.InlineKeyboardMarkup()
+		for x in events:
+			keyboard.add(types.InlineKeyboardButton(text=x['name'], callback_data='selectevent_{!s}'.format(x['id'])))
+		keyboard.add(types.InlineKeyboardButton(text='↪️ Назад', callback_data='selectalltypeevents'))
+		return bot.edit_message_text(texts.register_events_question_text, chat_id=cid, message_id=call.message.message_id, reply_markup=keyboard)
+	elif call.data.startswith('selectevent'):
+		event_id = int(call.data.split('_')[1])
+		if uid not in READY_TO_REGISTER:
+			text = 'Отправьте /start и повторите регистрацию'
+			return bot.edit_message_text(text, chat_id=cid, message_id=call.message.message_id, reply_markup=None)
+		event = database.get_event_by_id(event_id)
+		text = 'Вы выбрали мероприятие {!s}'.format(event['name'])
+		READY_TO_REGISTER[uid]['event_ids'].append(event_id)
+		READY_TO_REGISTER[uid]['events_text'] += '{!s}\n'.format(event['name'])
+		bot.edit_message_text(text, chat_id=cid, message_id=call.message.message_id, reply_markup=None)
+		text = 'Желаете отметить ещё мероприятия?'
+		keyboard = types.InlineKeyboardMarkup()
+		keyboard.add(types.InlineKeyboardButton(text='➕ Добавить ещё', callback_data='selectalltypeevents'))
+		keyboard.add(types.InlineKeyboardButton(text='➡️ Далее', callback_data='nextactionsafterevents'))
+		return bot.send_message(cid, text, reply_markup=keyboard)
+	elif call.data == 'selectalltypeevents':
+		typeofevents = database.get_all_typeofevents()
+		keyboard = types.InlineKeyboardMarkup()
+		for x in typeofevents:
+			keyboard.add(types.InlineKeyboardButton(text=x['name'], callback_data='selecttypeofevent_{!s}'.format(x['id'])))
+		return bot.edit_message_text(texts.register_type_events_question_text, chat_id=cid, message_id=call.message.message_id, reply_markup=keyboard)
+	elif call.data == 'nextactionsafterevents':
+		if uid not in READY_TO_REGISTER:
+			text = 'Отправьте /start и повторите регистрацию'
+			return bot.edit_message_text(text, chat_id=cid, message_id=call.message.message_id, reply_markup=None)
+		READY_TO_REGISTER[uid]['events'] = True
+		return bot.send_message(cid, texts.register_confirm_people_text)
 
 
 if __name__ == '__main__':

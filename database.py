@@ -96,6 +96,75 @@ def get_communities():
 			sql = 'SELECT * FROM community'
 			cursor.execute(sql)
 			return cursor.fetchall()
+	finally:
+		connection.close()
+
+
+def get_all_typeofevents():
+	"""
+	Получить все доступные типо событий
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'SELECT * FROM typeofevent'
+			cursor.execute(sql)
+			return cursor.fetchall()
+	finally:
+		connection.close()
+
+
+def get_events_by_event_type_id(typeofevent_id):
+	"""
+	Получить мероприятия по ID типа мероприятия
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'SELECT * FROM event WHERE type_of_event=%s'
+			cursor.execute(sql, (typeofevent_id,))
+			return cursor.fetchall()
+	finally:
+		connection.close()
+
+
+def get_event_by_id(event_id):
+	"""
+	Получить мероприятие по ID
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'SELECT * FROM event WHERE id=%s'
+			cursor.execute(sql, (event_id,))
+			return cursor.fetchone()
+	finally:
+		connection.close()
+
+
+def add_user_event(user_id, event_id):
+	"""
+	Добавить мероприятие пользователя
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'INSERT INTO event_user (event, user) VALUES (%s, %s)'
+			cursor.execute(sql, (event_id, user_id))
+		connection.commit()
+	finally:
+		connection.close()
+
+
+def delete_all_user_events(id):
+	"""
+	Удалить все мероприятия пользователя
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'DELETE FROM event_user WHERE user=%s'
+			cursor.execute(sql, (id,))
 		connection.commit()
 	finally:
 		connection.close()
