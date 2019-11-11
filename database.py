@@ -196,3 +196,17 @@ def get_user_events(user_id):
 		return cursor.fetchall()
 	finally:
 		connection.close()
+
+
+def is_user_in_whitelist(username):
+	"""
+	Проверка на присутствие пользователя в white листе
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'SELECT * FROM whitelist WHERE username=%s'
+			cursor.execute(sql, (username,))
+		return cursor.fetchone()
+	finally:
+		connection.close()

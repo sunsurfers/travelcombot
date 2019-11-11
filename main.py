@@ -94,6 +94,25 @@ def text_content_handler(message):
 	if uid in READY_TO_REGISTER:
 		if 'name' not in READY_TO_REGISTER[uid]:
 			READY_TO_REGISTER[uid]['name'] = message.text
+
+			# Попытка получения аватара пользователя
+			user_avatars = bot.get_user_profile_photos(uid)
+			if len(user_avatars.photos) > 0:
+				avatar = user_avatars.photos[0][-1]
+				file_info = bot.get_file(avatar.file_id)
+				downloaded_file = bot.download_file(file_info.file_path)
+				photo_path = '{!s}{!s}.jpg'.format(config.AVARATRS_PATH, uid)
+				with open(photo_path, 'wb') as new_file:
+					new_file.write(downloaded_file)
+				READY_TO_REGISTER[uid]['avatar'] = photo_path
+				markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
+				cm = database.get_communities()
+				communities = [x['name'] for x in cm]
+				for x in communities:
+					markup.add(x)
+				markup.add('Другое')
+				return bot.send_message(cid, texts.register_travel_type, reply_markup=markup)
+
 			markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True, row_width=1)
 			markup.row('Не сейчас')
 			return bot.send_message(cid, texts.add_avatar_text, reply_markup=markup)
@@ -114,16 +133,28 @@ def text_content_handler(message):
 				keyboard.add(types.InlineKeyboardButton('Узнать, кто такие сансерферы', url='https://sunsurfers.ru'))
 				keyboard.add(types.InlineKeyboardButton('Узнать, кто такие сменщики', url='https://smenastation.com'))
 				return bot.send_message(cid, texts.community_more_info_text, reply_markup=keyboard)
+
 			cm = database.get_communities()
 			communities = [x['name'] for x in cm]
 			if message.text not in communities:
 				return bot.send_message(cid, texts.error_button_text)
 			READY_TO_REGISTER[uid]['community'] = message.text
+
+			text = 'Вы выбрали сообщество {!s}'.format(READY_TO_REGISTER[uid]['community'])
+			markup = types.ReplyKeyboardRemove()
+			bot.send_message(cid, text, reply_markup=markup)
+
 			for x in cm:
 				if message.text == x['name']:
 					READY_TO_REGISTER[uid]['community_id'] = x['id']
 
-			# TODO: автоматическая проверка на присутсивие в white листе airtables
+			# Проверка на присутсивие в white листе airtables
+			if message.from_user.username:
+				if database.is_user_in_whitelist('@{!s}'.format(message.from_user.username)):
+					user = database.add_user(None, READY_TO_REGISTER[uid]['name'], READY_TO_REGISTER[uid]['avatar'],
+						1, None, uid, None, READY_TO_REGISTER[uid]['community_id'])
+					del READY_TO_REGISTER[uid]
+					return bot.send_message(uid, texts.success_confirm_anket_text)
 
 			if READY_TO_REGISTER[uid]['community'] == 'Смена':
 				READY_TO_REGISTER[uid]['events'] = ''
@@ -186,6 +217,12 @@ def text_content_handler(message):
 			del READY_TO_REGISTER[uid]
 			markup = types.ReplyKeyboardRemove()
 			return bot.send_message(cid, texts.register_complete, reply_markup=markup)
+
+	# Проверка на регистрацию прользователя
+	user = database.get_user(uid)
+	if not user:
+		markup = types.ReplyKeyboardRemove()
+		return bot.send_message(cid, texts.register_invite_text, reply_markup=markup)
 
 	# Обработка отмены действий пользователя
 	if message.text == '❌ Отменить':
