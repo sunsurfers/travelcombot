@@ -34,7 +34,19 @@ TravelComBot is a Telegram bot for travel communities like sunsurfers.ru or smen
 
 Для того, что бы изменять админов в боте, необходимо отредактировать переменную ADMINS в файле config.py и вставить туда Telegram ID нужного аккаунта. После этого необходимо перезапустить бота
 
-`$ python3 main.py`
+## Запуск без Docker
+
+1. Установить зависимости
+
+`pip install -r requirements.txt`
+
+2. Загрузить дамп базы данных
+
+`mysql ИМЯ_БАЗЫ -u ИМЯ_ПОЛЬЗОВАТЕЛЯ -p ПАРОЛЬ < schema.sql`
+
+3. Запустить процесс бота
+
+`python3 main.py`
 
 ## Запуск в Docker
 
