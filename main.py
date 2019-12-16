@@ -156,6 +156,7 @@ def text_content_handler(message):
 					del READY_TO_REGISTER[uid]
 					return bot.send_message(uid, texts.success_confirm_anket_text)
 
+			# На данный момент нет пероприятияй для Смены, поэтому опускаем этот шаг
 			if READY_TO_REGISTER[uid]['community'] == 'Смена':
 				READY_TO_REGISTER[uid]['events'] = ''
 				READY_TO_REGISTER[uid]['confirm_people'] = ''
