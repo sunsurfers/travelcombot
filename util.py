@@ -3,27 +3,27 @@ def get_month_name_by_number(month_number):
     Получить имя месяца по номеру
     """
     if month_number == 1:
-        return 'января'
+        return 'январь'
     elif month_number == 2:
-        return 'февраля'
+        return 'февраль'
     elif month_number == 3:
-        return 'марта'
+        return 'март'
     elif month_number == 4:
-        return 'апреля'
+        return 'апрель'
     elif month_number == 5:
-        return 'мая'
+        return 'май'
     elif month_number == 6:
-        return 'июня'
+        return 'июнь'
     elif month_number == 7:
-        return 'июля'
+        return 'июль'
     elif month_number == 8:
-        return 'августа'
+        return 'август'
     elif month_number == 9:
-        return 'сентября'
+        return 'сентябрь'
     elif month_number == 10:
-        return 'октября'
+        return 'октябрь'
     elif month_number == 11:
-        return 'ноября'
+        return 'ноябрь'
     elif month_number == 12:
-        return 'декабря'
+        return 'декабрь'
     return ''
