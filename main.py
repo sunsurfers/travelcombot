@@ -6,8 +6,9 @@ import telebot
 from telebot import types
 
 import database
-import texts
 import config
+import texts
+import util
 from main_func import main
 
 
@@ -404,7 +405,10 @@ def callback_inline(call):
 		events = database.get_events_by_event_type_id(typeofevent_id)
 		keyboard = types.InlineKeyboardMarkup()
 		for x in events:
-			keyboard.add(types.InlineKeyboardButton(text=x['name'], callback_data='selectevent_{!s}'.format(x['id'])))
+			month_name = util.get_month_name_by_number(x['date_of_the_event'].month)
+			country = database.get_country_by_id(x['country'])
+			event_name = '{!s}, {!s}, {!s} {!s}'.format(x['name'], country['name'], month_name, x['date_of_the_event'].year)
+			keyboard.add(types.InlineKeyboardButton(text=event_name, callback_data='selectevent_{!s}'.format(x['id'])))
 		keyboard.add(types.InlineKeyboardButton(text='↪️ Назад', callback_data='selectalltypeevents'))
 		return bot.edit_message_text(texts.register_events_question_text, chat_id=cid, message_id=call.message.message_id, reply_markup=keyboard)
 	elif call.data.startswith('selectevent'):
@@ -445,7 +449,10 @@ def callback_inline(call):
 		for x in events:
 			if x['id'] in user_event_ids:
 				continue
-			keyboard.add(types.InlineKeyboardButton(text=x['name'], callback_data='addselectevent_{!s}'.format(x['id'])))
+			month_name = util.get_month_name_by_number(x['date_of_the_event'].month)
+			country = database.get_country_by_id(x['country'])
+			event_name = '{!s}, {!s}, {!s} {!s}'.format(x['name'], country['name'], month_name, x['date_of_the_event'].year)
+			keyboard.add(types.InlineKeyboardButton(text=event_name, callback_data='addselectevent_{!s}'.format(x['id'])))
 		keyboard.add(types.InlineKeyboardButton(text='↪️ Назад', callback_data='addselectalltypeevents'))
 		return bot.edit_message_text(texts.register_events_question_text, chat_id=cid, message_id=call.message.message_id, reply_markup=keyboard)
 	elif call.data.startswith('addselectevent'):

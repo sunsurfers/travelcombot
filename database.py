@@ -210,3 +210,18 @@ def is_user_in_whitelist(username):
 		return cursor.fetchone()
 	finally:
 		connection.close()
+
+
+def get_country_by_id(country_id):
+	"""
+	Получить страну по ID
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'SELECT * FROM country WHERE id=%s'
+			cursor.execute(sql, (country_id,))
+		return cursor.fetchone()
+	finally:
+		connection.close()
+
