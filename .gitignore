@@ -5,3 +5,4 @@ avatars
 *.out
 *.db
 local_config*
+.env
