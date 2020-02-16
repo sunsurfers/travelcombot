@@ -225,3 +225,30 @@ def get_country_by_id(country_id):
 	finally:
 		connection.close()
 
+
+def add_visited_place(user, coordinates, city, date):
+	"""
+	Добавить посещенное место
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'INSERT INTO visited_paces (user, coordinates, city, date) VALUES (%s ,%s, %s, %s)'
+			cursor.execute(sql, (user, coordinates, city, date))
+		connection.commit()
+	finally:
+		connection.close()
+
+
+def get_all_visited_places():
+	"""
+	Получить всем посещенные места
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'SELECT * FROM visited_paces'
+			cursor.execute(sql)
+		return cursor.fetchall()
+	finally:
+		connection.close()
