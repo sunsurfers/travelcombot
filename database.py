@@ -252,3 +252,45 @@ def get_all_visited_places():
 		return cursor.fetchall()
 	finally:
 		connection.close()
+
+
+def add_maplinks(user, createdate, community, token):
+	"""
+	Добавить новую ссылку на карту
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'INSERT INTO maplinks (user, createdate, community, token) VALUES (%s ,%s, %s, %s)'
+			cursor.execute(sql, (user, createdate, community, token))
+		connection.commit()
+	finally:
+		connection.close()
+
+
+def get_maplink_by_token(token):
+	"""
+	Получить ссылку на карту по токену
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'SELECT * FROM maplinks WHERE token=%s'
+			cursor.execute(sql, (token,))
+			return cursor.fetchone()
+	finally:
+		connection.close()
+
+
+def delete_maplink(id):
+	"""
+	Удалить ссылку на карту
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'DELETE FROM maplinks WHERE id=%s'
+			cursor.execute(sql, (id,))
+		connection.commit()
+	finally:
+		connection.close()

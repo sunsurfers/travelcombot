@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
+import uuid
 import logging
+import datetime
 
 import telebot
 from telebot import types
@@ -22,6 +24,7 @@ READY_TO_REGISTER = {}  # Регистрация
 READY_TO_ADMIN_EMAIL = {}  # Рассылка сообщения админом
 READY_TO_ADD_ABOUT = {}  # Добавление about
 READY_TO_ADD_INSTA = {}  # Добавление insta
+READY_TO_SHARE_LOCATION = {}  # Шеринг геопозиции
 
 
 @bot.message_handler(commands=['start'])
@@ -60,6 +63,28 @@ def admin_command_handler(message):
 	for x in config.admin_markup:
 		markup.add(x)
 	return bot.send_message(cid, texts.admin_panel_greet_text, reply_markup=markup)
+
+
+@bot.message_handler(content_types=['location'])
+def location_content_handler(message):
+	cid = message.chat.id
+	uid = message.from_user.id
+
+	# Проверка на регистрацию прользователя
+	user = database.get_user(uid)
+	if not user:
+		markup = types.ReplyKeyboardRemove()
+		return bot.send_message(cid, texts.register_invite_text, reply_markup=markup)
+
+	# Обработка шеринга геопозиции
+	if uid in READY_TO_SHARE_LOCATION:
+		logging.info('User {!s} shared location'.format(cid))
+		coordinates = '{!s} {!s}'.format(message.location.longitude, message.location.latitude) 
+		database.add_visited_place(user['id'], coordinates, '', datetime.datetime.now())
+		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
+		for x in config.main_markup:
+			markup.row(x)
+		return bot.send_message(cid, texts.share_geo_success, reply_markup=markup)
 
 
 @bot.message_handler(content_types=['photo'])
@@ -230,6 +255,10 @@ def text_content_handler(message):
 	if message.text == '❌ Отменить':
 		if uid in READY_TO_ADD_ABOUT:
 			del READY_TO_ADD_ABOUT[uid]
+		if uid in READY_TO_ADD_INSTA:
+			del READY_TO_ADD_INSTA[uid]
+		if uid in READY_TO_SHARE_LOCATION:
+			del READY_TO_SHARE_LOCATION[uid]
 		bot.send_message(cid, texts.cancel_text)
 		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
 		for x in config.main_markup:
@@ -304,6 +333,10 @@ def text_content_handler(message):
 			markup.row('↪️ В главное меню')
 			return bot.send_message(cid, texts.settings_text, reply_markup=markup)
 
+	# Обработка отправки местоположения
+	if uid in READY_TO_SHARE_LOCATION:
+		return bot.send_message(cid, texts.share_geo_not_valid)
+
 	# Обработка админ-панели
 	if uid in config.ADMINS:
 		if message.text == '📩 Создать рассылку':
@@ -314,9 +347,20 @@ def text_content_handler(message):
 
 	# Обработка основной клавиатуры пользователя
 	if message.text == '📍 Поделиться геолокацией':
-		return bot.send_message(cid, 'В разработке...')
+		READY_TO_SHARE_LOCATION[uid] = {}
+		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
+		markup.add(types.KeyboardButton(text="🗺 Отправить местоположение", request_location=True))
+		markup.add('❌ Отменить')
+		return bot.send_message(cid, texts.send_location_text, reply_markup=markup)
 	elif message.text == '🗺 Посмотреть геолокации пользователей':
-		return bot.send_message(cid, 'В разработке...')
+		communities = database.get_communities()
+
+		keyboard = types.InlineKeyboardMarkup()
+		for x in communities:
+			keyboard.add(types.InlineKeyboardButton(x['name'], callback_data='showmapcommunity_{!s}'.format(x['id'])))
+		keyboard.add(types.InlineKeyboardButton('Все пользователи', callback_data='showmapcommunity_all'))
+
+		return bot.send_message(cid, texts.select_community_map, reply_markup=keyboard)
 	elif message.text == '⚙️ Настройки':
 		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
 		for x in config.setting_markup:
@@ -472,6 +516,16 @@ def callback_inline(call):
 		for x in typeofevents:
 			keyboard.add(types.InlineKeyboardButton(text=x['name'], callback_data='addselecttypeofevent_{!s}'.format(x['id'])))
 		return bot.edit_message_text(texts.register_type_events_question_text, chat_id=cid, message_id=call.message.message_id, reply_markup=keyboard)
+	elif call.data.startswith('showmapcommunity'):
+		community_id = call.data.split('_')[1]
+
+		user = database.get_user(uid)		
+		token = str(uuid.uuid4()).replace('-', '')
+		database.add_maplinks(user['id'], datetime.datetime.now(), community_id, token)
+
+		maplink = '{!s}{!s}'.format(config.MAP_SERVER_DOMEN, token)
+		text = 'Карта доступна по ссылке в течение {!s} минут\n\n{!s}'.format(config.MAP_AVAILABLE_MINUTES, maplink)
+		return bot.edit_message_text(text, chat_id=cid, message_id=call.message.message_id)
 
 
 if __name__ == '__main__':
