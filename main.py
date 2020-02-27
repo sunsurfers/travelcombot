@@ -81,6 +81,7 @@ def location_content_handler(message):
 		logging.info('User {!s} shared location'.format(cid))
 		coordinates = '{!s} {!s}'.format(message.location.longitude, message.location.latitude) 
 		database.add_visited_place(user['id'], coordinates, '', datetime.datetime.now())
+		del READY_TO_SHARE_LOCATION[uid]
 		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
 		for x in config.main_markup:
 			markup.row(x)

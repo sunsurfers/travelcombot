@@ -66,6 +66,7 @@ def map_router(token):
             "features": geojson_feature
         }
     })
+	geojson_feature = json.dumps(geojson_feature)
 	print(geojson_feature)
 
 	return render_template('map.html', geojson_feature=geojson_feature)
