@@ -40,7 +40,7 @@ def map_router(token):
 		if maplink['community'] == 'all' or str(user['community']) == str(maplink['community']):
 			if str(user['id']) in last_visited_places:
 				last_visited_places_filtered[str(user['id'])] = last_visited_places[str(user['id'])]
-				map_description = 'Имя: {!s}\nО себе: {!s}\nИнстаграм: {!s}'.format(user['name'], user['about'], user['insta'])
+				map_description = 'Имя: {!s}<br>О себе: {!s}<br>Инстаграм: {!s}'.format(user['name'], user['about'], user['insta'])
 				last_visited_places_filtered[str(user['id'])]['map_description'] = map_description
 	last_visited_places = last_visited_places_filtered
 
@@ -59,17 +59,16 @@ def map_router(token):
 			}
 		})
 
-	geojson_feature = json.dumps({
+	geojson_feature = {
         "type": "geojson",
         "data": {
             "type": "FeatureCollection",
             "features": geojson_feature
         }
-    })
-	geojson_feature = json.dumps(geojson_feature)
+    }
 	print(geojson_feature)
 
-	return render_template('map.html', geojson_feature=geojson_feature)
+	return render_template('map.html', geojson_feature=json.dumps(geojson_feature))
 
 
 if __name__ == '__main__':
