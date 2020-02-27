@@ -119,6 +119,10 @@ def text_content_handler(message):
 	# Обработка первой регистрации пользователя в боте
 	if uid in READY_TO_REGISTER:
 		if 'name' not in READY_TO_REGISTER[uid]:
+			# Проверка на ввод Имени и Фамилии
+			if len(message.text.split(' ')) < 2:
+				return bot.send_message(cid, texts.error_name_text)
+
 			READY_TO_REGISTER[uid]['name'] = message.text
 
 			# Попытка получения аватара пользователя
