@@ -22,7 +22,10 @@ admin_channel_id = -1001346987455
 # Данные локального сервера карты
 MAP_SERVER_HOST = '0.0.0.0'
 MAP_SERVER_PORT = 8080
-MAP_SERVER_DOMEN = 'http://0.0.0.0:8080/'  # TODO: Ссылка на карту для пользователя
+MAP_SERVER_DOMEN = 'http://0.0.0.0:8080/'
+
+if not DEBUG:
+	MAP_SERVER_DOMEN = 'http://5.187.5.95:8080/'
 
 # Время доступности ссылки на карту в минутах
 MAP_AVAILABLE_MINUTES = 10  

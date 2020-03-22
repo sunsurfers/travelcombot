@@ -6,3 +6,4 @@ avatars
 *.db
 local_config*
 .env
+test.py

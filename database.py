@@ -212,6 +212,20 @@ def is_user_in_whitelist(username):
 		connection.close()
 
 
+def add_user_to_white_list(name, username, phone=None):
+	"""
+	Добавить пользователя в white лист
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'INSERT INTO whitelist (name, username, phone) VALUES (%s, %s, %s)'
+			cursor.execute(sql, (name, username, phone))
+		connection.commit()
+	finally:
+		connection.close()
+
+
 def get_country_by_id(country_id):
 	"""
 	Получить страну по ID
