@@ -305,9 +305,14 @@ def text_content_handler(message):
 	# Обработка добавления about
 	if uid in READY_TO_ADD_ABOUT:
 		if 'text' not in READY_TO_ADD_ABOUT[uid]:
+			# Ограничение на ввод не менее 10 и не более 30 слов
+			if len(message.text.split(' ')) < 10 or len(message.text.split(' ')) > 30:
+				text = 'Короткое описание себя должно быть не менее 10 и не более 30 слов.'
+				return bot.send_message(cid, text)
+			
 			READY_TO_ADD_ABOUT[uid]['text'] = message.text
 
-			# Обвновить данные о пользователе в базе
+			# Обновить данные о пользователе в базе
 			user = database.get_user(uid)
 			database.update_user(user['id'], user['email'], user['name'], user['photo'], user['is_host'],
 				READY_TO_ADD_ABOUT[uid]['text'], user['telegram'], user['insta'], user['community'])

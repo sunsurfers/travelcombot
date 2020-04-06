@@ -3,6 +3,7 @@
 import json
 import datetime
 
+import geohash
 from flask import Flask
 from flask import render_template
 
@@ -47,6 +48,13 @@ def map_router(token):
 	# Сгенерировать geojson feature для вывода на карту
 	geojson_feature = []
 	for x in last_visited_places:
+		geohash_code = geohash.encode(
+			float(last_visited_places[x]['coordinates'].split(' ')[0]),
+			float(last_visited_places[x]['coordinates'].split(' ')[1]), 
+			precision=5,
+		)
+		coords = geohash.decode(geohash_code)
+
 		geojson_feature.append({
 			'type': 'Feature',
 			'properties': {
@@ -55,7 +63,7 @@ def map_router(token):
 			},
 			'geometry': {
 				'type': 'Point',
-				'coordinates': [last_visited_places[x]['coordinates'].split(' ')[0], last_visited_places[x]['coordinates'].split(' ')[1]]
+				'coordinates': [coords[0], coords[1]]
 			}
 		})
 
