@@ -41,7 +41,23 @@ def map_router(token):
 		if maplink['community'] == 'all' or str(user['community']) == str(maplink['community']):
 			if str(user['id']) in last_visited_places:
 				last_visited_places_filtered[str(user['id'])] = last_visited_places[str(user['id'])]
-				map_description = 'Имя: {!s}<br>О себе: {!s}<br>Инстаграм: {!s}'.format(user['name'], user['about'], user['insta'])
+				last_visited_places_filtered[str(user['id'])]['community'] = user['community']
+
+				if not user['about']:
+					user['about'] = 'Не указано'
+				if not user['insta']:
+					user['insta'] = 'Не указано'
+
+				map_description = 'Имя: {!s}<br>О себе: {!s}<br>Инстаграм: <a target="_blank" href="{!s}">{!s}</a>'.format(
+					user['name'], user['about'], user['insta'],  user['insta']
+				)
+				map_description += '<br>Написать в телеграм: <a target="_blank" href="tg://user?id={!s}">открыть</a>'.format(
+					user['telegram']
+				)
+				map_description += '<br>Дата обновления локации: {!s}'.format(
+					str(last_visited_places_filtered[str(user['id'])]['date']).split(' ')[0]
+				)
+
 				last_visited_places_filtered[str(user['id'])]['map_description'] = map_description
 	last_visited_places = last_visited_places_filtered
 
@@ -51,27 +67,35 @@ def map_router(token):
 		geohash_code = geohash.encode(
 			float(last_visited_places[x]['coordinates'].split(' ')[0]),
 			float(last_visited_places[x]['coordinates'].split(' ')[1]), 
-			precision=5,
+			precision = 5,  # Коэффициент неточности местоположения
 		)
 		coords = geohash.decode(geohash_code)
 
-		geojson_feature.append({
+		json_data = {
 			'type': 'Feature',
 			'properties': {
 				'description': last_visited_places[x]['map_description'],
-				'icon': 'rocket'
+				# 'icon': 'rocket'
 			},
 			'geometry': {
 				'type': 'Point',
 				'coordinates': [coords[0], coords[1]]
 			}
-		})
+		}
+
+		# Вывести иконку в соответствии с сообщестом
+		if int(last_visited_places[x]['community']) == 1:
+			json_data['properties']['icon'] = 'bar'
+		else:
+			json_data['properties']['icon'] = 'rocket'
+
+		geojson_feature.append(json_data)
 
 	geojson_feature = {
-        "type": "geojson",
-        "data": {
-            "type": "FeatureCollection",
-            "features": geojson_feature
+        'type': 'geojson',
+        'data': {
+            'type': 'FeatureCollection',
+            'features': geojson_feature
         }
     }
 	print(geojson_feature)
