@@ -45,7 +45,7 @@ def start_command_handler(message):
 		return bot.send_message(cid, texts.wait_confirm_text)
 
 	markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
-	for x in config.main_markup:
+	for x in config.MainMarkup:
 		markup.row(x)
 	return bot.send_message(cid, texts.main_text, reply_markup=markup)
 
@@ -83,7 +83,7 @@ def location_content_handler(message):
 		database.add_visited_place(user['id'], coordinates, '', datetime.datetime.now())
 		del READY_TO_SHARE_LOCATION[uid]
 		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
-		for x in config.main_markup:
+		for x in config.MainMarkup:
 			markup.row(x)
 		return bot.send_message(cid, texts.share_geo_success, reply_markup=markup)
 
@@ -271,7 +271,7 @@ def text_content_handler(message):
 			del READY_TO_SHARE_LOCATION[uid]
 		bot.send_message(cid, texts.cancel_text)
 		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
-		for x in config.main_markup:
+		for x in config.MainMarkup:
 			markup.row(x)
 		return bot.send_message(cid, texts.main_text, reply_markup=markup)
 
@@ -367,7 +367,7 @@ def text_content_handler(message):
 			return bot.send_message(cid, texts.ready_send_email_admin_text, reply_markup=markup)
 
 	# Обработка основной клавиатуры пользователя
-	if message.text == '📍 Поделиться геолокацией':
+	if message.text == config.MainMarkup.share_loc:
 		READY_TO_SHARE_LOCATION[uid] = {}
 		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
 		markup.add(types.KeyboardButton(text="🗺 Отправить местоположение", request_location=True))
@@ -401,7 +401,7 @@ def text_content_handler(message):
 	# Возврат в главное меню
 	if message.text == '↪️ В главное меню':
 		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
-		for x in config.main_markup:
+		for x in config.MainMarkup:
 			markup.row(x)
 		return bot.send_message(cid, texts.main_text, reply_markup=markup)
 
