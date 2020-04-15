@@ -11,9 +11,9 @@ ADMINS = [217166737, 263156959]
 
 # MySQL данные для авторизации
 db_host = 'mysql'
-db_user = 'root'
-db_password = ''
-db_database = ''
+db_user = os.getenv('db_user')
+db_password = os.getenv('db_password')
+db_database = os.getenv('db_database')
 db_charset = 'utf8'
 
 # ID Telegram канала для подтверждение анкет пользователей
