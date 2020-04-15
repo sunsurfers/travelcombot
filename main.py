@@ -378,7 +378,7 @@ def text_content_handler(message):
 		token = str(uuid.uuid4()).replace('-', '')
 		database.add_maplinks(user['id'], datetime.datetime.now(), 'all', token)
 
-		maplink = '{!s}{!s}'.format(config.MAP_SERVER_DOMEN, token)
+		maplink = '{!s}{!s}'.format(config.MAP_SERVER_DOMAIN, token)
 		text = 'Карта доступна по ссылке в течение {!s} минут\n\n{!s}'.format(config.MAP_AVAILABLE_MINUTES, maplink)
 		return bot.send_message(cid, text)
 		'''

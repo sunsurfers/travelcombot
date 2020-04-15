@@ -1,15 +1,19 @@
 import os
+
 from enum import Enum
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
-DEBUG = False
+DEBUG = (os.getenv('DEBUG') == "True")
+print(DEBUG)
 PROXY = {'https': os.getenv('PROXY_STRING')}
 LOGGER_PATH = 'logging.log'
 AVARATRS_PATH = 'avatars/'
+
 # ID Telegram админов в боте
+# @fomchenkov_v: 217166737
+# @nemelnikov: 263156959
 # @skywinder = 84380711
 ADMINS = [217166737, 263156959, 84380711]
-
 # MySQL данные для авторизации
 db_host = 'mysql'
 db_user = os.getenv('db_user')
