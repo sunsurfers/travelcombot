@@ -227,3 +227,13 @@ CREATE TABLE whitelist (
   `phone` varchar(255),
   PRIMARY KEY (id)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE maplinks (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user` int(11) NOT NULL,
+  `createdate` datetime NOT NULL,
+  `community` varchar(255) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;

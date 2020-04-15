@@ -212,6 +212,20 @@ def is_user_in_whitelist(username):
 		connection.close()
 
 
+def add_user_to_white_list(name, username, phone=None):
+	"""
+	Добавить пользователя в white лист
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'INSERT INTO whitelist (name, username, phone) VALUES (%s, %s, %s)'
+			cursor.execute(sql, (name, username, phone))
+		connection.commit()
+	finally:
+		connection.close()
+
+
 def get_country_by_id(country_id):
 	"""
 	Получить страну по ID
@@ -225,3 +239,72 @@ def get_country_by_id(country_id):
 	finally:
 		connection.close()
 
+
+def add_visited_place(user, coordinates, city, date):
+	"""
+	Добавить посещенное место
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'INSERT INTO visited_paces (user, coordinates, city, date) VALUES (%s ,%s, %s, %s)'
+			cursor.execute(sql, (user, coordinates, city, date))
+		connection.commit()
+	finally:
+		connection.close()
+
+
+def get_all_visited_places():
+	"""
+	Получить всем посещенные места
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'SELECT * FROM visited_paces'
+			cursor.execute(sql)
+		return cursor.fetchall()
+	finally:
+		connection.close()
+
+
+def add_maplinks(user, createdate, community, token):
+	"""
+	Добавить новую ссылку на карту
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'INSERT INTO maplinks (user, createdate, community, token) VALUES (%s ,%s, %s, %s)'
+			cursor.execute(sql, (user, createdate, community, token))
+		connection.commit()
+	finally:
+		connection.close()
+
+
+def get_maplink_by_token(token):
+	"""
+	Получить ссылку на карту по токену
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'SELECT * FROM maplinks WHERE token=%s'
+			cursor.execute(sql, (token,))
+			return cursor.fetchone()
+	finally:
+		connection.close()
+
+
+def delete_maplink(id):
+	"""
+	Удалить ссылку на карту
+	"""
+	connection = get_connection()
+	try:
+		with connection.cursor() as cursor:
+			sql = 'DELETE FROM maplinks WHERE id=%s'
+			cursor.execute(sql, (id,))
+		connection.commit()
+	finally:
+		connection.close()
