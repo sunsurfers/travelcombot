@@ -1,6 +1,16 @@
 # travelcombot
 TravelComBot is a Telegram bot for travel communities like [sunsurfers.ru](sunsurfers.ru) or [smenastation.com](smenastation.com)
 
+<!-- toc -->
+
+  * [Функциональные требования для пользователя:](#%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D0%BE%D0%BD%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B5-%D1%82%D1%80%D0%B5%D0%B1%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-%D0%B4%D0%BB%D1%8F-%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D1%8F)
+  * [Функциональные требования для администратора:](#%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D0%BE%D0%BD%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B5-%D1%82%D1%80%D0%B5%D0%B1%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-%D0%B4%D0%BB%D1%8F-%D0%B0%D0%B4%D0%BC%D0%B8%D0%BD%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%B0)
+- [Установка](#%D1%83%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0)
+  * [Запуск без Docker](#%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA-%D0%B1%D0%B5%D0%B7-docker)
+  * [Запуск в Docker](#%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA-%D0%B2-docker)
+
+<!-- tocstop -->
+
 ### Функциональные требования для пользователя:
 
 Объединение пользователей бота в существующие сообщества путешественников: Сансерферы и Смена, посредством первичной регистрации пользователя.
@@ -37,12 +47,12 @@ TravelComBot is a Telegram bot for travel communities like [sunsurfers.ru](sunsu
 - Отправка произвольного сообщения всем пользователям бота.
 
 
-### Установка
+## Установка
 Для того, что бы изменять админов в боте, необходимо отредактировать переменную ADMINS в файле config.py и вставить туда Telegram ID нужного аккаунта. После этого необходимо перезапустить бота
 
 Бота необохимо добавить в чат, куда он будет присылать анкеты для проверки администратором
 
-## Запуск без Docker
+### Запуск без Docker
 
 0. прописать переменные в файл `.env`
 
@@ -58,7 +68,7 @@ TravelComBot is a Telegram bot for travel communities like [sunsurfers.ru](sunsu
 
 `python3 main.py`
 
-## Запуск в Docker
+### Запуск в Docker
 
 1. Установить Docker
 

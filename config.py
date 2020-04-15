@@ -12,9 +12,9 @@ ADMINS = [217166737, 263156959, 84380711]
 
 # MySQL данные для авторизации
 db_host = 'mysql'
-db_user = 'root'
-db_password = ''
-db_database = ''
+db_user = os.getenv('db_user')
+db_password = os.getenv('db_password')
+db_database = os.getenv('db_database')
 db_charset = 'utf8'
 
 # ID Telegram канала для подтверждение анкет пользователей
@@ -37,7 +37,6 @@ class MainMarkup(Enum):
     share_loc = '📍 Поделиться геолокацией'
     show_loc = '🗺 Посмотреть геолокации пользователей'
     goto_settings = '⚙️ Настройки'
-
 
 setting_markup = [
     'ℹ️ Рассказать о себе и своих интересах',
