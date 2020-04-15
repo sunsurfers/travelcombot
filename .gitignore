@@ -7,3 +7,5 @@ avatars
 local_config*
 .env
 test.py
+.gitsecret/keys/random_seed
+!*.secret
