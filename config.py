@@ -7,7 +7,8 @@ PROXY = {'https': os.getenv('PROXY_STRING')}
 LOGGER_PATH = 'logging.log'
 AVARATRS_PATH = 'avatars/'
 # ID Telegram админов в боте
-ADMINS = [217166737, 263156959]
+# skywinder = 84380711
+ADMINS = [217166737, 263156959, 84380711]
 
 # MySQL данные для авторизации
 db_host = 'mysql'
