@@ -6,7 +6,10 @@ DEBUG = False
 PROXY = {'https': os.getenv('PROXY_STRING')}
 LOGGER_PATH = 'logging.log'
 AVARATRS_PATH = 'avatars/'
+
 # ID Telegram админов в боте
+# @fomchenkov_v: 217166737
+# @nemelnikov: 263156959
 # @skywinder = 84380711
 ADMINS = [217166737, 263156959, 84380711]
 
