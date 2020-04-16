@@ -59,9 +59,9 @@ def get_all_users():
 
 
 def get_user(uid):
-	"""
-	Получить заявку пользователя
-	"""
+	# """
+	# Получить заявку пользователя
+	# """
 	connection = get_connection()
 	try:
 		with connection.cursor() as cursor:

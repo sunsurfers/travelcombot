@@ -4,7 +4,7 @@ from enum import Enum
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 DEBUG = (os.getenv('DEBUG') == "True")
-print(DEBUG)
+print('DEBUG = %s' % (DEBUG))
 PROXY = {'https': os.getenv('PROXY_STRING')}
 LOGGER_PATH = 'logging.log'
 AVARATRS_PATH = 'avatars/'
