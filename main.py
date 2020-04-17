@@ -381,16 +381,16 @@ def text_content_handler(message):
 		maplink = '{!s}{!s}'.format(config.MAP_SERVER_DOMAIN, token)
 		text = 'Карта доступна по ссылке в течение {!s} минут\n\n{!s}'.format(config.MAP_AVAILABLE_MINUTES, maplink)
 		return bot.send_message(cid, text)
-		'''
-		communities = database.get_communities()
-
-		keyboard = types.InlineKeyboardMarkup()
-		for x in communities:
-			keyboard.add(types.InlineKeyboardButton(x['name'], callback_data='showmapcommunity_{!s}'.format(x['id'])))
-		keyboard.add(types.InlineKeyboardButton('Все пользователи', callback_data='showmapcommunity_all'))
-
-		return bot.send_message(cid, texts.select_community_map, reply_markup=keyboard)
-		'''
+		# '''
+		# communities = database.get_communities()
+		#
+		# keyboard = types.InlineKeyboardMarkup()
+		# for x in communities:
+		# 	keyboard.add(types.InlineKeyboardButton(x['name'], callback_data='showmapcommunity_{!s}'.format(x['id'])))
+		# keyboard.add(types.InlineKeyboardButton('Все пользователи', callback_data='showmapcommunity_all'))
+		#
+		# return bot.send_message(cid, texts.select_community_map, reply_markup=keyboard)
+		# '''
 	elif message.text == '⚙️ Настройки':
 		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1)
 		for x in config.setting_markup:
