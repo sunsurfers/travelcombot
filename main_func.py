@@ -15,7 +15,6 @@ def main(bot):
         except:
             raise OSError("Can't create destination directory (%s)!" % path)
 
-    print(config.DEBUG)
     if config.DEBUG:
         apihelper.proxy = config.PROXY
         bot.polling()
