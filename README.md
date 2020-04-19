@@ -56,13 +56,11 @@ TravelComBot is a Telegram bot for travel communities like [sunsurfers.ru](sunsu
 
 0. прописать переменные в файл `.env`
 
-1. Установить зависимости
+1. Установить зависимости: `pip install -r requirements.txt`
 
-`pip install -r requirements.txt`
+2. Загрузить дамп базы данных: `./bootstrap.sh`
 
-2. Загрузить дамп базы данных
-
-`mysql ИМЯ_БАЗЫ -u ИМЯ_ПОЛЬЗОВАТЕЛЯ -p ПАРОЛЬ < schema.sql`
+   ​	*(или вручную:`mysql ИМЯ_БАЗЫ -u ИМЯ_ПОЛЬЗОВАТЕЛЯ -p ПАРОЛЬ < schema.sql`)*
 
 3. Запустить процесс бота
 
