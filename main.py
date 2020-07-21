@@ -46,7 +46,7 @@ def start_command_handler(message):
     markup = types.ReplyKeyboardMarkup(
         resize_keyboard=True, one_time_keyboard=False, row_width=1)
     for x in config.MainMarkup:
-        markup.row(x)
+        markup.row(x.value)
     return bot.send_message(cid, texts.main_text, reply_markup=markup)
 
 
@@ -88,7 +88,7 @@ def location_content_handler(message):
         markup = types.ReplyKeyboardMarkup(
             resize_keyboard=True, one_time_keyboard=False, row_width=1)
         for x in config.MainMarkup:
-            markup.row(x)
+            markup.row(x.value)
         return bot.send_message(cid, texts.share_geo_success, reply_markup=markup)
 
 
@@ -287,7 +287,7 @@ def text_content_handler(message):
         markup = types.ReplyKeyboardMarkup(
             resize_keyboard=True, one_time_keyboard=False, row_width=1)
         for x in config.MainMarkup:
-            markup.row(x)
+            markup.row(x.value)
         return bot.send_message(cid, texts.main_text, reply_markup=markup)
 
     # Обработка отмены действий админа
@@ -389,7 +389,7 @@ def text_content_handler(message):
             return bot.send_message(cid, texts.ready_send_email_admin_text, reply_markup=markup)
 
     # Обработка основной клавиатуры пользователя
-    if message.text == config.MainMarkup.share_loc:
+    if message.text == config.MainMarkup.share_loc.value:
         READY_TO_SHARE_LOCATION[uid] = {}
         markup = types.ReplyKeyboardMarkup(
             resize_keyboard=True, one_time_keyboard=False, row_width=1)
@@ -397,7 +397,7 @@ def text_content_handler(message):
             text="🗺 Отправить местоположение", request_location=True))
         markup.add('❌ Отменить')
         return bot.send_message(cid, texts.send_location_text, reply_markup=markup)
-    elif message.text == '🗺 Посмотреть геолокации пользователей':
+    elif message.text == config.MainMarkup.show_loc.value:
         user = database.get_user(uid)
         token = str(uuid.uuid4()).replace('-', '')
         database.add_maplinks(
@@ -417,7 +417,7 @@ def text_content_handler(message):
     #
     # return bot.send_message(cid, texts.select_community_map, reply_markup=keyboard)
     # '''
-    elif message.text == '⚙️ Настройки':
+    elif message.text == config.MainMarkup.goto_settings.value:
         markup = types.ReplyKeyboardMarkup(
             resize_keyboard=True, one_time_keyboard=False, row_width=1)
         for x in config.setting_markup:
@@ -430,7 +430,7 @@ def text_content_handler(message):
         markup = types.ReplyKeyboardMarkup(
             resize_keyboard=True, one_time_keyboard=False, row_width=1)
         for x in config.MainMarkup:
-            markup.row(x)
+            markup.row(x.value)
         return bot.send_message(cid, texts.main_text, reply_markup=markup)
 
     # Обработка меню настроек
